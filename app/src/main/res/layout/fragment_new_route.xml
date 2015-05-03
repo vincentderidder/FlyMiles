@@ -1,6 +1,6 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" tools:context="be.vincentderidder.flymiles.NewRoute">
+    android:layout_height="match_parent" tools:context="be.vincentderidder.flymiles.NewRouteFragment">
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -23,20 +23,21 @@
 
             <AutoCompleteTextView
             android:id="@+id/autoCompleteTextView"
-            android:layout_width="match_parent"
+            android:layout_width="292dp"
             android:layout_height="wrap_content"
             android:ems="10"
-                android:text="" >
+                android:text=""
+                android:layout_weight="0.54">
             <requestFocus />
         </AutoCompleteTextView>
 
 
         <Button
                 style="?android:attr/buttonStyleSmall"
-                android:layout_width="90dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="add"
-                android:id="@+id/btnAdd1" />
+                android:text="ADD"
+                android:id="@+id/btnAdd" />
         </LinearLayout>
 
         <LinearLayout
@@ -49,18 +50,6 @@
             android:layout_marginRight="5dp"
             android:layout_marginTop="15dp" >
 
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/editText"
-                android:layout_weight="0.95" />
-
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="90dp"
-                android:layout_height="wrap_content"
-                android:text="add"
-                android:id="@+id/button" />
         </LinearLayout>
 
     </LinearLayout>

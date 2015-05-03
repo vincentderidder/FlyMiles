@@ -1,6 +1,5 @@
 package be.vincentderidder.flymiles;
 
-import android.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
@@ -20,7 +19,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void switchNewRoute(){
-        NewRoute nFragment = new NewRoute();
+        NewRouteFragment nFragment = new NewRouteFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.container, nFragment).addToBackStack(null).commit();
