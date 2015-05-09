@@ -7,7 +7,7 @@ public class location {
     public String address;
     public String id;
     public String reference;
-    public String lat;
-    public String lon;
+    public double lat;
+    public double lon;
     public String toString(){return address;}
 }

@@ -1,45 +1,39 @@
 package be.vincentderidder.flymiles;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import android.app.Activity;
+import java.util.List;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
- import android.widget.Toast;
+import android.widget.ListView;
+import android.widget.Toast;
 
-import be.vincentderidder.flymiles.data.AutocompleteLoader;
-import be.vincentderidder.flymiles.data.CoordinateLoader;
+import se.walkercrou.places.GooglePlaces;
+import se.walkercrou.places.Place;
+import se.walkercrou.places.Prediction;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class NewRouteFragment extends Fragment implements AdapterView.OnItemClickListener {
+public class NewRouteFragment extends Fragment implements AdapterView.OnItemClickListener{
 
     public static final ArrayList<location> routeLoc= new ArrayList<>();
+    ArrayList<String> viewloc;
     private location selected;
     Button btnAdd;
-
+    ListView lstSelected;
+    GooglePlaces client;
     public NewRouteFragment() {
         // Required empty public constructor
     }
@@ -47,7 +41,8 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        client = new GooglePlaces("AIzaSyBwLWUVxPSo7zi7X0TUZ4B280tAGnbJGho");
+        viewloc = new ArrayList<>();
 
     }
 
@@ -59,13 +54,19 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
         AutoCompleteTextView autoCompView = (AutoCompleteTextView) v.findViewById(R.id.autoCompleteTextView);
         autoCompView.setAdapter(new GooglePlacesAutocompleteAdapter(getActivity(), R.layout.list_item));
         autoCompView.setOnItemClickListener(this);
-        btnAdd = (Button) getActivity().findViewById(R.id.btnAdd);
+
+        lstSelected = (ListView) v.findViewById(R.id.lstSelected);
+        btnAdd = (Button) v.findViewById(R.id.btnAdd);
         btnAdd.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                CoordinateLoader cl = new CoordinateLoader(getActivity(), selected);
-                selected = cl.loadInBackground();
+                Place p = client.getPlaceById(selected.id);
+                selected.lat = p.getLatitude();
+                selected.lon = p.getLongitude();
                 routeLoc.add(selected);
+                viewloc.add(selected.address);
+                ArrayAdapter<String> arrayAdapter =  new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1,viewloc);
+                lstSelected.setAdapter(arrayAdapter);
             }
         });
         return v;
@@ -80,7 +81,7 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
 
     class GooglePlacesAutocompleteAdapter extends ArrayAdapter implements Filterable {
 
-        private ArrayList<location> resultList;
+        private ArrayList<location> resultList = new ArrayList<>();
 
         public GooglePlacesAutocompleteAdapter(Context context, int textViewResourceId) {
 
@@ -112,9 +113,13 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
                     if (constraint != null) {
 
                         // Retrieve the autocomplete results.
-                        AutocompleteLoader al = new AutocompleteLoader(getActivity(), constraint.toString());
-                        resultList = al.loadInBackground();
-
+                        List<Prediction> predictions = client.getPlacePredictions(constraint.toString());
+                        for(int i=0; i<predictions.size() ; i++){
+                            location l = new location();
+                            l.address = predictions.get(i).getDescription();
+                            l.id = predictions.get(i).getPlaceId();
+                            resultList.add(l);
+                        }
                         // Assign the data to the FilterResults
 
                         filterResults.values = resultList;
