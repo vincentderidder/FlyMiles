@@ -34,6 +34,7 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
     Button btnAdd;
     ListView lstSelected;
     GooglePlaces client;
+    ArrayAdapter<String> listAdapter;
     public NewRouteFragment() {
         // Required empty public constructor
     }
@@ -43,6 +44,8 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
         super.onCreate(savedInstanceState);
         client = new GooglePlaces("AIzaSyBwLWUVxPSo7zi7X0TUZ4B280tAGnbJGho");
         viewloc = new ArrayList<>();
+
+
 
     }
 
@@ -54,19 +57,26 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
         AutoCompleteTextView autoCompView = (AutoCompleteTextView) v.findViewById(R.id.autoCompleteTextView);
         autoCompView.setAdapter(new GooglePlacesAutocompleteAdapter(getActivity(), R.layout.list_item));
         autoCompView.setOnItemClickListener(this);
-
+        listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_expandable_list_item_1,viewloc);
         lstSelected = (ListView) v.findViewById(R.id.lstSelected);
+        lstSelected.setAdapter(listAdapter);
         btnAdd = (Button) v.findViewById(R.id.btnAdd);
         btnAdd.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                Place p = client.getPlaceById(selected.id);
-                selected.lat = p.getLatitude();
-                selected.lon = p.getLongitude();
-                routeLoc.add(selected);
-                viewloc.add(selected.address);
-                ArrayAdapter<String> arrayAdapter =  new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1,viewloc);
-                lstSelected.setAdapter(arrayAdapter);
+
+                new Thread(){
+                    public void run(){
+                        Place p = client.getPlaceById(selected.id);
+                        selected.lat = p.getLatitude();
+                        selected.lon = p.getLongitude();
+                        routeLoc.add(selected);
+
+                    }
+                }.start();
+                listAdapter.add(selected.address);
+
+
             }
         });
         return v;
