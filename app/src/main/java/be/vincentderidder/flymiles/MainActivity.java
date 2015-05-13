@@ -7,14 +7,20 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
 
-public class MainActivity extends ActionBarActivity {
 
+public class MainActivity extends ActionBarActivity implements NewRouteFragment.showMapFragmentListener {
+    private ArrayList<location> currentRoute = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        switchNewRoute();
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.container, NewRouteFragment.newInstance(currentRoute))
+                    .commit();
+        }
     }
 
     public void switchNewRoute(){
@@ -23,8 +29,8 @@ public class MainActivity extends ActionBarActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.container, nFragment).addToBackStack(null).commit();
     }
-    public void switchMap(){
-        MapsFragment mapFragment = new MapsFragment();
+    public void showMapFragment(ArrayList<location> route){
+        MapsFragment mapFragment = MapsFragment.newInstance(route);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.container, mapFragment).addToBackStack(null).commit();

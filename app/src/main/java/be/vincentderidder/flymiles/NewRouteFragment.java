@@ -1,8 +1,10 @@
 package be.vincentderidder.flymiles;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -27,18 +29,28 @@ import se.walkercrou.places.Prediction;
  * A simple {@link Fragment} subclass.
  */
 public class NewRouteFragment extends Fragment implements AdapterView.OnItemClickListener{
-
-    public static final ArrayList<location> routeLoc= new ArrayList<>();
+    public static ArrayList<location> routeLoc= new ArrayList<>();
+    public showMapFragmentListener showMapListener;
     ArrayList<String> viewloc;
     private location selected;
-    Button btnAdd;
+    Button btnAdd, btnMap;
     ListView lstSelected;
     GooglePlaces client;
     ArrayAdapter<String> listAdapter;
     public NewRouteFragment() {
         // Required empty public constructor
     }
+    public static NewRouteFragment newInstance(ArrayList<location> routeLoc){
+        NewRouteFragment fragment = new NewRouteFragment();
+        fragment.setRoute(routeLoc);
+        return fragment;
+    }
+    private void setRoute(ArrayList<location> route){
+        if(route != null){
+            routeLoc = route;
+        }
 
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,13 +60,30 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
 
 
     }
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        //This makes sure that the container activity has implemented
+        //the callback interface. If not, it throws an exception.
+        try
+        {
+            showMapListener = (showMapFragmentListener) activity;
+        }
+
+        catch(ClassCastException e)
+        {
+            throw new ClassCastException(activity.toString()+ " must implement showMapListener");
+        }
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_new_route, container, false);
         // Inflate the layout for this fragment
-        AutoCompleteTextView autoCompView = (AutoCompleteTextView) v.findViewById(R.id.autoCompleteTextView);
+        final AutoCompleteTextView autoCompView = (AutoCompleteTextView) v.findViewById(R.id.autoCompleteTextView);
         autoCompView.setAdapter(new GooglePlacesAutocompleteAdapter(getActivity(), R.layout.list_item));
         autoCompView.setOnItemClickListener(this);
         listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_expandable_list_item_1,viewloc);
@@ -75,10 +104,18 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
                     }
                 }.start();
                 listAdapter.add(selected.address);
-
+                autoCompView.setText("");
 
             }
         });
+        btnMap = (Button) v.findViewById(R.id.btnMap);
+        btnMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMapListener.showMapFragment(routeLoc);
+            }
+        });
+
         return v;
     }
     public void onItemClick(AdapterView adapterView, View view, int position, long id) {
@@ -91,7 +128,7 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
 
     class GooglePlacesAutocompleteAdapter extends ArrayAdapter implements Filterable {
 
-        private ArrayList<location> resultList = new ArrayList<>();
+        private ArrayList<location> resultList;
 
         public GooglePlacesAutocompleteAdapter(Context context, int textViewResourceId) {
 
@@ -121,7 +158,7 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
                     FilterResults filterResults = new FilterResults();
 
                     if (constraint != null) {
-
+                        resultList = new ArrayList<>();
                         // Retrieve the autocomplete results.
                         List<Prediction> predictions = client.getPlacePredictions(constraint.toString());
                         for(int i=0; i<predictions.size() ; i++){
@@ -164,6 +201,10 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
 
         }
 
+    }
+
+    public interface showMapFragmentListener{
+        public void showMapFragment(ArrayList<location> route);
     }
 
 }
