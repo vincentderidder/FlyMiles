@@ -1,6 +1,5 @@
 package be.vincentderidder.flymiles;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +8,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -20,8 +20,10 @@ import android.widget.Filterable;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.SphericalUtil;
+
 import se.walkercrou.places.GooglePlaces;
-import se.walkercrou.places.Place;
 import se.walkercrou.places.Prediction;
 
 
@@ -29,23 +31,24 @@ import se.walkercrou.places.Prediction;
  * A simple {@link Fragment} subclass.
  */
 public class NewRouteFragment extends Fragment implements AdapterView.OnItemClickListener{
-    public static ArrayList<location> routeLoc= new ArrayList<>();
+    public static ArrayList<Place> routeLoc= new ArrayList<>();
     public showMapFragmentListener showMapListener;
     ArrayList<String> viewloc;
-    private location selected;
-    Button btnAdd, btnMap;
+    private Place selected;
+    Button btnMap;
     ListView lstSelected;
     GooglePlaces client;
     ArrayAdapter<String> listAdapter;
+    AutoCompleteTextView autoCompView;
     public NewRouteFragment() {
         // Required empty public constructor
     }
-    public static NewRouteFragment newInstance(ArrayList<location> routeLoc){
+    public static NewRouteFragment newInstance(ArrayList<Place> routeLoc){
         NewRouteFragment fragment = new NewRouteFragment();
         fragment.setRoute(routeLoc);
         return fragment;
     }
-    private void setRoute(ArrayList<location> route){
+    private void setRoute(ArrayList<Place> route){
         if(route != null){
             routeLoc = route;
         }
@@ -56,6 +59,7 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
         super.onCreate(savedInstanceState);
         client = new GooglePlaces("AIzaSyBwLWUVxPSo7zi7X0TUZ4B280tAGnbJGho");
         viewloc = new ArrayList<>();
+        setHasOptionsMenu(true);
 
 
 
@@ -83,52 +87,50 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_new_route, container, false);
         // Inflate the layout for this fragment
-        final AutoCompleteTextView autoCompView = (AutoCompleteTextView) v.findViewById(R.id.autoCompleteTextView);
+        autoCompView = (AutoCompleteTextView) v.findViewById(R.id.autoCompleteTextView);
         autoCompView.setAdapter(new GooglePlacesAutocompleteAdapter(getActivity(), R.layout.list_item));
         autoCompView.setOnItemClickListener(this);
         listAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_expandable_list_item_1,viewloc);
         lstSelected = (ListView) v.findViewById(R.id.lstSelected);
         lstSelected.setAdapter(listAdapter);
-        btnAdd = (Button) v.findViewById(R.id.btnAdd);
-        btnAdd.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-
-                new Thread(){
-                    public void run(){
-                        Place p = client.getPlaceById(selected.id);
-                        selected.lat = p.getLatitude();
-                        selected.lon = p.getLongitude();
-                        routeLoc.add(selected);
-
-                    }
-                }.start();
-                listAdapter.add(selected.address);
-                autoCompView.setText("");
-
-            }
-        });
-        btnMap = (Button) v.findViewById(R.id.btnMap);
-        btnMap.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showMapListener.showMapFragment(routeLoc);
-            }
-        });
-
         return v;
     }
+
     public void onItemClick(AdapterView adapterView, View view, int position, long id) {
-        selected = (location) adapterView.getItemAtPosition(position);
+        selected = (Place) adapterView.getItemAtPosition(position);
+        new Thread(){
+            public void run(){
+                se.walkercrou.places.Place p = client.getPlaceById(selected.id);
+                selected.lat = p.getLatitude();
+                selected.lng = p.getLongitude();
+                if(routeLoc.size() != 0){
+                    Place last = routeLoc.get(routeLoc.size()-1);
+                    LatLng prev = new LatLng(last.lat, last.lng);
+                    selected.dist = SphericalUtil.computeDistanceBetween(prev, new LatLng(selected.lat, selected.lng));
+                }
+                else{selected.dist = 0;}
+                routeLoc.add(selected);
+                selected.save();
+
+            }
+        }.start();
+        listAdapter.add(selected.address);
+        autoCompView.setText("");
         Toast.makeText(getActivity(), selected.address, Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.action_map: {showMapListener.showMapFragment(routeLoc);return true;}
+            default:  return super.onOptionsItemSelected(item);
+        }
 
-
+    }
 
     class GooglePlacesAutocompleteAdapter extends ArrayAdapter implements Filterable {
 
-        private ArrayList<location> resultList;
+        private ArrayList<Place> resultList;
 
         public GooglePlacesAutocompleteAdapter(Context context, int textViewResourceId) {
 
@@ -143,9 +145,11 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
         }
 
         @Override
-        public location getItem(int index) {
-
-            return resultList.get(index);
+        public Place getItem(int index) {
+                if(resultList.size()>0){
+                    return resultList.get(index);
+                }
+            else return null;
 
         }
 
@@ -162,7 +166,7 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
                         // Retrieve the autocomplete results.
                         List<Prediction> predictions = client.getPlacePredictions(constraint.toString());
                         for(int i=0; i<predictions.size() ; i++){
-                            location l = new location();
+                            Place l = new Place();
                             l.address = predictions.get(i).getDescription();
                             l.id = predictions.get(i).getPlaceId();
                             resultList.add(l);
@@ -204,7 +208,7 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
     }
 
     public interface showMapFragmentListener{
-        public void showMapFragment(ArrayList<location> route);
+        public void showMapFragment(ArrayList<Place> route);
     }
 
 }

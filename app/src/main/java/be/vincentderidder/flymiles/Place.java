@@ -1,13 +1,15 @@
 package be.vincentderidder.flymiles;
 
+import com.orm.SugarRecord;
+
 /**
- * Created by Bas on 2/05/2015.
+ * Created by Vincent on 2/05/2015.
  */
-public class location {
+public class Place extends SugarRecord<Place> {
     public String address;
     public String id;
-    public String reference;
     public double lat;
-    public double lon;
+    public double lng;
+    public double dist;
     public String toString(){return address;}
 }

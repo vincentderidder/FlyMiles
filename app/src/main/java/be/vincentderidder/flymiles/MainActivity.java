@@ -1,5 +1,7 @@
 package be.vincentderidder.flymiles;
 
+
+
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
@@ -8,30 +10,37 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 
-public class MainActivity extends ActionBarActivity implements NewRouteFragment.showMapFragmentListener {
-    private ArrayList<location> currentRoute = null;
+public class MainActivity extends ActionBarActivity implements NewRouteFragment.showMapFragmentListener, MapsFragment.showListFragmentListener {
+    private ArrayList<Place> currentRoute = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, NewRouteFragment.newInstance(currentRoute))
-                    .commit();
+        Iterator<Place> Route = Place.findAll(Place.class);
+        while(Route.hasNext()){
+            currentRoute.add(Route.next());
         }
+        if (currentRoute == null) {
+            showListFragment(currentRoute);
+        }
+        else{
+            showMapFragment(currentRoute);
+        }
+
     }
 
-    public void switchNewRoute(){
-        NewRouteFragment nFragment = new NewRouteFragment();
+    public void showListFragment(ArrayList<Place> route){
+        NewRouteFragment nFragment =NewRouteFragment.newInstance(route);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.container, nFragment).addToBackStack(null).commit();
     }
-    public void showMapFragment(ArrayList<location> route){
-        MapsFragment mapFragment = MapsFragment.newInstance(route);
+    public void showMapFragment(ArrayList<Place> route){
         FragmentManager fragmentManager = getSupportFragmentManager();
+        MapsFragment mapFragment = MapsFragment.newInstance(route);
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.container, mapFragment).addToBackStack(null).commit();
     }

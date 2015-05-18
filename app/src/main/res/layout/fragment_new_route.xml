@@ -1,6 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" tools:context="be.vincentderidder.flymiles.NewRouteFragment">
+    android:layout_height="match_parent" tools:context="be.vincentderidder.flymiles.NewRouteFragment"
+    android:background="#ffffffff">
 
 
     <ListView
@@ -18,28 +19,14 @@
     android:ems="10"
         android:text=""
         android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:background="@color/lightblue"
+        android:layout_margin="0dp"
+        android:padding="15dp"
+        android:textColor="#ffffffff">
     <requestFocus />
 </AutoCompleteTextView>
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ADD"
-        android:id="@+id/btnAdd"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@+id/autoCompleteTextView" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="GO TO MAP"
-        android:id="@+id/btnMap"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true" />
 
 
 </RelativeLayout>
