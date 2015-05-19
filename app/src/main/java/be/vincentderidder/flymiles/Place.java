@@ -10,6 +10,7 @@ public class Place extends SugarRecord<Place> {
     public String id;
     public double lat;
     public double lng;
-    public double dist;
+    public int dist;
+    public int pos;
     public String toString(){return address;}
 }

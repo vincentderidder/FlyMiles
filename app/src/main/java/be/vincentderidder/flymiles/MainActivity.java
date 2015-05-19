@@ -10,6 +10,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 
 
@@ -23,7 +25,14 @@ public class MainActivity extends ActionBarActivity implements NewRouteFragment.
         while(Route.hasNext()){
             currentRoute.add(Route.next());
         }
-        if (currentRoute == null) {
+        Collections.sort(currentRoute, new Comparator<Place>() {
+            @Override
+            public int compare(Place p1, Place p2) {
+
+                return Double.compare(p1.pos,p2.pos);
+            }
+        });
+        if (currentRoute.size() == 0) {
             showListFragment(currentRoute);
         }
         else{

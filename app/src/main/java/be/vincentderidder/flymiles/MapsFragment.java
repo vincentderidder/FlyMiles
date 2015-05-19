@@ -68,7 +68,7 @@ public class MapsFragment extends Fragment{
             Log.d("An Error occured: ", ex.getMessage());
         }
         this.map = ((MapFragment) getActivity().getFragmentManager().findFragmentById(R.id.map)).getMap();
-        testMap();
+        setMap();
         return view;
     }
 
@@ -98,7 +98,8 @@ public class MapsFragment extends Fragment{
     private void addMarker(double lat, double lng){
         map.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.bullseye)).anchor(0.5f,0.5f).position(new LatLng(lat, lng)));
     }
-    private void testMap() {
+    private void setMap() {
+        map.clear();
         if(route.size()>0){
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(route.get(0).lat, route.get(0).lng), 3));
         }
