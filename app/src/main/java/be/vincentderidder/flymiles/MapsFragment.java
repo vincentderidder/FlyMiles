@@ -30,18 +30,9 @@ public class MapsFragment extends Fragment{
     ArrayList<Place> route;
     private GoogleMap map;
     private  static View view;
-    public showListFragmentListener showListFragmentListener;
-    public SettingsFragment.showSettingsFragmentListener showSettingsListener;
     public MapsFragment(){}
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()){
-            case R.id.action_list: showListFragmentListener.showListFragment(route);break;
-            case R.id.action_settings: showSettingsListener.showSettingsFragment();break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+
 
     public static MapsFragment newInstance(ArrayList<Place> routeLoc){
         MapsFragment fragment = new MapsFragment();
@@ -73,23 +64,7 @@ public class MapsFragment extends Fragment{
         return view;
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
 
-        //This makes sure that the container activity has implemented
-        //the callback interface. If not, it throws an exception.
-        try
-        {
-            showListFragmentListener = (showListFragmentListener) activity;
-            showSettingsListener = (SettingsFragment.showSettingsFragmentListener) activity;
-        }
-
-        catch(ClassCastException e)
-        {
-            throw new ClassCastException(activity.toString()+ " must implement showListFragmentListener");
-        }
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -118,9 +93,17 @@ public class MapsFragment extends Fragment{
                 Place l1 = route.get(i);
                 if (i + 1 < route.size()) {
                     Place l2 = route.get(i + 1);
-                    map.addPolyline(new PolylineOptions().geodesic(true).width(3).color(Color.rgb(37, 77, 117))
-                            .add(new LatLng(l1.lat, l1.lng))
-                            .add(new LatLng(l2.lat, l2.lng)));
+                    if(MainActivity.EXTRA_MAP.equals("Satellite")||MainActivity.EXTRA_MAP.equals("Hybrid")){
+                        map.addPolyline(new PolylineOptions().geodesic(true).width(3).color(Color.rgb(255, 255, 255))
+                                .add(new LatLng(l1.lat, l1.lng))
+                                .add(new LatLng(l2.lat, l2.lng)));
+                    }
+                    else{
+                        map.addPolyline(new PolylineOptions().geodesic(true).width(3).color(Color.rgb(37, 77, 117))
+                                .add(new LatLng(l1.lat, l1.lng))
+                                .add(new LatLng(l2.lat, l2.lng)));
+                    }
+
                     addMarker(l2.lat, l2.lng);
 
                 } else return;
@@ -131,8 +114,6 @@ public class MapsFragment extends Fragment{
 
     }
 
-    public interface showListFragmentListener{
-        public void showListFragment(ArrayList<Place> route);
-    }
+
 
 }

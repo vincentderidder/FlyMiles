@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -38,8 +39,6 @@ import se.walkercrou.places.Prediction;
  */
 public class NewRouteFragment extends Fragment implements AdapterView.OnItemClickListener{
     public static ArrayList<Place> routeLoc= new ArrayList<>();
-    public showMapFragmentListener showMapListener;
-    public SettingsFragment.showSettingsFragmentListener showSettingsListener;
     ArrayList<String> viewloc;
     private Place selected;
     DynamicListView lstSelected;
@@ -71,25 +70,6 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
 
 
     }
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        //This makes sure that the container activity has implemented
-        //the callback interface. If not, it throws an exception.
-        try
-        {
-            showMapListener = (showMapFragmentListener) activity;
-            showSettingsListener = (SettingsFragment.showSettingsFragmentListener) activity;
-        }
-
-        catch(ClassCastException e)
-        {
-            throw new ClassCastException(activity.toString()+ " must implement showMapListener");
-        }
-    }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -140,6 +120,8 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
         return v;
     }
 
+
+
     public void onItemClick(AdapterView adapterView, View view, int position, long id) {
         selected = (Place) adapterView.getItemAtPosition(position);
          Thread t = new Thread(){
@@ -168,15 +150,7 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
         Toast.makeText(getActivity(), selected.address, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()){
-            case R.id.action_map: showMapListener.showMapFragment(routeLoc);break;
-            case R.id.action_settings: showSettingsListener.showSettingsFragment();break;
-            default:  return super.onOptionsItemSelected(item);
-        }
-    return true;
-    }
+
     class RouteAdapter extends ArrayAdapter<Place> implements Swappable{
         private ArrayList<Place> items;
         public RouteAdapter(Context context, int textViewResourceId, ArrayList<Place> items){
@@ -327,8 +301,5 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
 
     }
 
-    public interface showMapFragmentListener{
-        public void showMapFragment(ArrayList<Place> route);
-    }
 
 }
