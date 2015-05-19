@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -32,12 +31,14 @@ public class MapsFragment extends Fragment{
     private GoogleMap map;
     private  static View view;
     public showListFragmentListener showListFragmentListener;
+    public SettingsFragment.showSettingsFragmentListener showSettingsListener;
     public MapsFragment(){}
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
-            case R.id.action_list: showListFragmentListener.showListFragment(route);
+            case R.id.action_list: showListFragmentListener.showListFragment(route);break;
+            case R.id.action_settings: showSettingsListener.showSettingsFragment();break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -81,11 +82,12 @@ public class MapsFragment extends Fragment{
         try
         {
             showListFragmentListener = (showListFragmentListener) activity;
+            showSettingsListener = (SettingsFragment.showSettingsFragmentListener) activity;
         }
 
         catch(ClassCastException e)
         {
-            throw new ClassCastException(activity.toString()+ " must implement showMapListener");
+            throw new ClassCastException(activity.toString()+ " must implement showListFragmentListener");
         }
     }
 
@@ -100,24 +102,31 @@ public class MapsFragment extends Fragment{
     }
     private void setMap() {
         map.clear();
-        if(route.size()>0){
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(route.get(0).lat, route.get(0).lng), 3));
+        switch(MainActivity.EXTRA_MAP){
+            case "Map":map.setMapType(GoogleMap.MAP_TYPE_NORMAL);break;
+            case "Hybrid":map.setMapType(GoogleMap.MAP_TYPE_HYBRID);break;
+            case "Terrain":map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);break;
+            case "Satellite":map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);break;
+                default:map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         }
 
-        addMarker(route.get(0).lat, route.get(0).lng);
-        for(int i=0; i<route.size();i++){
-            Place l1 = route.get(i);
-            if(i+1 < route.size()){
-                Place l2 = route.get(i+1);
-                map.addPolyline(new PolylineOptions().geodesic(true).width(3).color(Color.rgb(37, 77, 117))
-                        .add(new LatLng(l1.lat, l1.lng))
-                        .add(new LatLng(l2.lat, l2.lng)));
-                addMarker(l2.lat, l2.lng);
+        if(route.size()>0) {
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(route.get(0).lat, route.get(0).lng), 3));
+
+            addMarker(route.get(0).lat, route.get(0).lng);
+            for (int i = 0; i < route.size(); i++) {
+                Place l1 = route.get(i);
+                if (i + 1 < route.size()) {
+                    Place l2 = route.get(i + 1);
+                    map.addPolyline(new PolylineOptions().geodesic(true).width(3).color(Color.rgb(37, 77, 117))
+                            .add(new LatLng(l1.lat, l1.lng))
+                            .add(new LatLng(l2.lat, l2.lng)));
+                    addMarker(l2.lat, l2.lng);
+
+                } else return;
+
 
             }
-            else return;
-
-
         }
 
     }

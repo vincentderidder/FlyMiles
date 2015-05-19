@@ -1,7 +1,6 @@
 package be.vincentderidder.flymiles;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,16 +8,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
@@ -26,7 +22,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.SphericalUtil;
-import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
 import com.nhaarman.listviewanimations.appearance.simple.SwingBottomInAnimationAdapter;
 import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
 import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.OnItemMovedListener;
@@ -44,13 +39,13 @@ import se.walkercrou.places.Prediction;
 public class NewRouteFragment extends Fragment implements AdapterView.OnItemClickListener{
     public static ArrayList<Place> routeLoc= new ArrayList<>();
     public showMapFragmentListener showMapListener;
+    public SettingsFragment.showSettingsFragmentListener showSettingsListener;
     ArrayList<String> viewloc;
     private Place selected;
     DynamicListView lstSelected;
     GooglePlaces client;
     AutoCompleteTextView autoCompView;
     RouteAdapter routeAdapter;
-    TouchViewDraggableManager dragManager;
     SwingBottomInAnimationAdapter animationAdapter;
     public NewRouteFragment() {
         // Required empty public constructor
@@ -85,6 +80,7 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
         try
         {
             showMapListener = (showMapFragmentListener) activity;
+            showSettingsListener = (SettingsFragment.showSettingsFragmentListener) activity;
         }
 
         catch(ClassCastException e)
@@ -175,10 +171,11 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
-            case R.id.action_map: {showMapListener.showMapFragment(routeLoc);return true;}
+            case R.id.action_map: showMapListener.showMapFragment(routeLoc);break;
+            case R.id.action_settings: showSettingsListener.showSettingsFragment();break;
             default:  return super.onOptionsItemSelected(item);
         }
-
+    return true;
     }
     class RouteAdapter extends ArrayAdapter<Place> implements Swappable{
         private ArrayList<Place> items;
@@ -202,7 +199,15 @@ public class NewRouteFragment extends Fragment implements AdapterView.OnItemClic
                     name.setText(p.address);
                 }
                 if(dist != null){
-                    dist.setText(String.valueOf(p.dist)+" km");
+                    if(MainActivity.EXTRA_UNIT.equals("Miles")){
+                        Double miles = p.dist * 0.621371192;
+                        int mi = miles.intValue();
+                        dist.setText(String.valueOf(mi)+" miles");
+                    }
+                    else{
+                        dist.setText(String.valueOf(p.dist)+" km");
+                    }
+
                 }
             }
             return v;
