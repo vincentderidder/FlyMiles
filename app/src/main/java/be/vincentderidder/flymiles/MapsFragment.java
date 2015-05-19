@@ -76,6 +76,7 @@ public class MapsFragment extends Fragment{
         map.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.bullseye)).anchor(0.5f,0.5f).position(new LatLng(lat, lng)));
     }
     private void setMap() {
+        map.setMyLocationEnabled(true);
         map.clear();
         switch(MainActivity.EXTRA_MAP){
             case "Map":map.setMapType(GoogleMap.MAP_TYPE_NORMAL);break;
